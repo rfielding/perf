@@ -60,7 +60,7 @@ separate counters for events and observation time (in the non-concurrent case).
 Note:
 
 ```
-  (t0*c0/t0 + t1*c1/t1 + ...)/(t0+t1+...) == (c0*t0/c0 + c1*t1/c1 + ...)/(c0+c1+...)
+  (t0*c0/t0 + t1*c1/t1 + ...)/(t0+t1+...) == 1/((c0*t0/c0 + c1*t1/c1 + ...)/(c0+c1+...))
 ```
 The typical arithmetic mean is just where the weights are 1/n.
 The harmonic mean is where we deal with inverse quantities (what you usually want for rates).
@@ -77,11 +77,18 @@ If we can maintain separate counters for population size (ie: queue length), the
 lot of sophistocated counts:
 
 * Utilization is just subtracting out zero population time from the total.
+* Queue length distribution
 * Throughput as a function of 1 user, 2 users, 4 users, ... .  This lets us measure linear scaling and bottlenecks.
 * We don't need to be able to characterize a distribution analytically.
 * No floating point.  It's all rational 64 bit integer arithmetic.
-* Speedup is just the total time reported by the concurrent processes divided by the total of
-  the times per queue length. 
+* Speedup - the total work divided by the total time experienced (individually) by each user, divided by
+  the real time. 
+
+Note that user interleaving behavior can cause profound performance differences.
+It may be that we can have hundreds of concurrent sessions all downloading at 1MB/s,
+and then there is a queue length we eventually get bottlenecked under, such that the
+linear scaling stops.  When more users are downloading and we are at this point,
+we also want to measure whether even total throughput begins to go down.
 
 # De-duplicating time
 
